@@ -122,6 +122,7 @@ function main() {
     var planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
 
 
+    // TODO increment by more than one (setting line width appropriately) for more blocky
     for(var x = 0; x < width; ++x)
     {
         // calculate ray position and direction
