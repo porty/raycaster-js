@@ -240,7 +240,7 @@ function main() {
             case 1:  color = 'red';  break; //red
             case 2:  color = 'green';  break; //green
             case 3:  color = 'blue';   break; //blue
-            case 4:  color = 'white';  break; //white
+            case 4:  color = 'pink';  break; //white
             default: color = 'yellow'; break; //yellow
         }
 
