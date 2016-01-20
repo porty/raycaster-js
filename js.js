@@ -91,25 +91,24 @@ function verLine(x, drawStart, drawEnd, color) {
     console.log("Drawing a " + color + " line at " + x + " from " + drawStart + " to " + drawEnd);
 
     ctx.beginPath();
-
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
     ctx.moveTo(x, 0);
-    ctx.fillStyle = '#ffffff';
     ctx.lineTo(x, drawStart);
     ctx.stroke();
-    ctx.closePath();
 
     ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
     ctx.moveTo(x, drawStart);
-    ctx.fillStyle = 'red';
-    ctx.lineTo(x, drawEnd + 1);
+    ctx.lineTo(x, drawEnd);
     ctx.stroke();
-    ctx.closePath();
 
     ctx.beginPath();
-    ctx.moveTo(x, drawStart);
-    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.moveTo(x, drawEnd);
     ctx.lineTo(x, canvas.height - 1);
-    ctx.closePath();
     ctx.stroke();
 }
 
