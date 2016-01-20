@@ -88,8 +88,6 @@ function findObjectFromRay(origin, angle, returnObjectFromRay) {
 }
 
 function verLine(x, drawStart, drawEnd, color) {
-    console.log("Drawing a " + color + " line at " + x + " from " + drawStart + " to " + drawEnd);
-
     ctx.beginPath();
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
@@ -115,9 +113,6 @@ function verLine(x, drawStart, drawEnd, color) {
 function main() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-
-    // ctx.fillStyle = "green";
-    // ctx.fillRect(10, 10, 100, 100);
 
     var width = canvas.width;
     var height = canvas.height;
