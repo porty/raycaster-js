@@ -141,6 +141,7 @@ function onKeyDown(e) {
     var index = keyToIndex(e.key);
     if (index !== null) {
         keys[index] = false;
+        e.preventDefault();
     }
 }
 
@@ -148,6 +149,7 @@ function onKeyUp(e) {
     var index = keyToIndex(e.key);
     if (index !== null) {
         keys[index] = true;
+        e.preventDefault();
     }
 }
 
