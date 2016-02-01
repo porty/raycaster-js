@@ -28,6 +28,10 @@ var worldMap = [
 var canvas = null;
 var ctx = null;
 
+var int = Math.round;
+var cos = Math.cos;
+var sin = Math.sin;
+
 function Point(x, y) {
     this.x = x;
     this.y = y;
@@ -77,6 +81,18 @@ function drawMap(map, context) {
     }
 }
 
+var frameRateCounter = 0;
+var frameRateCounterElement = null;
+function updateFrameRate(rate) {
+    ++frameRateCounter;
+    if (frameRateCounter === 20) {
+        if (frameRateCounterElement === null) {
+            frameRateCounterElement = document.getElementById('frameRateCounter');
+        }
+        frameRateCounterElement.innerText = rate + 'FPS';
+    }
+}
+
 function ObjectFromRay() {
     this.blockType = 0;
     this.distance = 0;
@@ -110,9 +126,50 @@ function verLine(x, drawStart, drawEnd, color) {
     ctx.stroke();
 }
 
+var SDLK_UP = 0;
+var SDLK_DOWN = 1;
+var SDLK_LEFT = 2;
+var SDLK_RIGHT = 3;
+
+var keys = [false, false, false, false];
+
+function isKeyDown(key) {
+    return keys[key];
+}
+
+function onKeyDown(e) {
+    var index = keyToIndex(e.key);
+    if (index !== null) {
+        keys[index] = false;
+    }
+}
+
+function onKeyUp(e) {
+    var index = keyToIndex(e.key);
+    if (index !== null) {
+        keys[index] = true;
+    }
+}
+
+function keyToIndex(key) {
+    switch(key) {
+        case VK_UP:
+            return SDLK_UP;
+        case VK_DOWN:
+            return SDLK_DOWN;
+        case VK_LEFT:
+            return SDLK_LEFT;
+        case VK_RIGHT:
+            return SDLK_RIGHT;
+    }
+    return null;
+}
+
 function main() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
+    canvas.addEventListener("keydown", onKeyDown);
+    canvas.addEventListener("keyup", onKeyUp);
 
     var width = canvas.width;
     var height = canvas.height;
@@ -121,6 +178,8 @@ function main() {
     var dirX = -1.0, dirY = 0.0; //initial direction vector
     var planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
 
+    var oldTime = 0;
+    var time = Date.now();
 
     // TODO increment by more than one (setting line width appropriately) for more blocky
     for(var x = 0; x < width; ++x)
@@ -249,6 +308,58 @@ function main() {
         //draw the pixels of the stripe as a vertical line
         verLine(x, drawStart, drawEnd, color);
     }
+
+    oldTime = time;
+    time = Date.now();
+    var frameTime = (time - oldTime) / 1000.0; //frameTime is the time this frame has taken, in seconds
+    updateFrameRate(1.0 / frameTime); //FPS counter
+    // draw here somewhere
+
+    //speed modifiers
+    var moveSpeed = frameTime * 5.0; //the constant value is in squares/second
+    var rotSpeed = frameTime * 3.0; //the constant value is in radians/second
+
+
+    // no need to read any keys first, the event handlers take care of that
+
+    if (isKeyDown(SDLK_UP)) {
+        //move forward if no wall in front of you
+        if(worldMap[Math.round(posX + dirX * moveSpeed)][Math.round(posY)] === false) {
+            posX += dirX * moveSpeed;
+        }
+        if(worldMap[Math.round(posX)][Math.round(posY + dirY * moveSpeed)] === false) {
+            posY += dirY * moveSpeed;
+        }
+    } else if (isKeyDown(SDLK_DOWN)) {
+        //move backwards if no wall behind you
+        if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] === false) {
+            posX -= dirX * moveSpeed;
+        }
+        if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] === false) {
+            posY -= dirY * moveSpeed;
+        }
+    }
+
+    if (isKeyDown(SDLK_RIGHT)) {
+        //rotate to the right
+        //both camera direction and camera plane must be rotated
+        var oldDirX = dirX;
+        dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
+        dirY = oldDirX * sin(-rotSpeed) + dirY * cos(-rotSpeed);
+        var oldPlaneX = planeX;
+        planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
+        planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
+    } else if (isKeyDown(SDLK_LEFT)) {
+        //rotate to the left
+        //both camera direction and camera plane must be rotated
+        var oldDirX = dirX;
+        dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
+        dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
+        var oldPlaneX = planeX;
+        planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
+        planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
+    }
+
 
 
     // for (var x = 0; x < canvas.width; ++x) {
