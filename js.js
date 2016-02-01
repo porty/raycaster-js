@@ -25,7 +25,7 @@ var worldMap = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-var int = Math.round;
+var int = Math.floor;
 var cos = Math.cos;
 var sin = Math.sin;
 
@@ -193,8 +193,8 @@ function main() {
             var rayDirY = dirY + planeY * cameraX;
 
             //which box of the map we're in
-            var mapX = Math.round(rayPosX);
-            var mapY = Math.round(rayPosY);
+            var mapX = int(rayPosX);
+            var mapY = int(rayPosY);
 
             //length of ray from current position to next x or y-side
             var sideDistX;
@@ -272,7 +272,7 @@ function main() {
 
 
             //Calculate height of line to draw on screen
-            var lineHeight = Math.abs(Math.round(height / perpWallDist));
+            var lineHeight = Math.abs(int(height / perpWallDist));
 
             //calculate lowest and highest pixel to fill in current stripe
             var drawStart = -lineHeight / 2 + height / 2;
@@ -324,10 +324,10 @@ function main() {
 
         if (isKeyDown(SDLK_UP)) {
             //move forward if no wall in front of you
-            if(worldMap[Math.round(posX + dirX * moveSpeed)][Math.round(posY)] === 0) {
+            if(worldMap[int(posX + dirX * moveSpeed)][int(posY)] === 0) {
                 posX += dirX * moveSpeed;
             }
-            if(worldMap[Math.round(posX)][Math.round(posY + dirY * moveSpeed)] === 0) {
+            if(worldMap[int(posX)][int(posY + dirY * moveSpeed)] === 0) {
                 posY += dirY * moveSpeed;
             }
         } else if (isKeyDown(SDLK_DOWN)) {
