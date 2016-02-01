@@ -25,6 +25,15 @@ var worldMap = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
+var colours = [
+    null,
+    ["rgb(255, 0, 0)", "rgb(127, 0, 0)"], // reg
+    ["rgb(0, 255, 0)", "rgb(0, 127, 0)"], // green
+    ["rgb(0, 0, 255)", "rgb(0, 0, 127)"], // blue
+    ["rgb(255, 127, 127)", "rgb(127, 63, 63)"], // pink
+    ["rgb(255, 255, 0)", "rgb(127, 127, 0)"], // yellow
+];
+
 var int = Math.floor;
 var cos = Math.cos;
 var sin = Math.sin;
@@ -286,25 +295,8 @@ function main() {
                 drawEnd = height - 1;
             }
 
-
-
             //choose wall color
-            var color;
-            switch(worldMap[mapX][mapY])
-            {
-                case 1:  color = 'red';  break; //red
-                case 2:  color = 'green';  break; //green
-                case 3:  color = 'blue';   break; //blue
-                case 4:  color = 'pink';  break; //white
-                default: color = 'yellow'; break; //yellow
-            }
-
-            //give x and y sides different brightness
-            if (side == 1)
-            {
-                    //color = color / 2;
-            }
-
+            var color = colours[worldMap[mapX][mapY]][side];
             //draw the pixels of the stripe as a vertical line
             verLine(ctx, height, x, drawStart, drawEnd, color);
         }
