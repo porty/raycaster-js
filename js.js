@@ -25,9 +25,6 @@ var worldMap = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-var canvas = null;
-var ctx = null;
-
 var int = Math.round;
 var cos = Math.cos;
 var sin = Math.sin;
@@ -103,7 +100,7 @@ function findObjectFromRay(origin, angle, returnObjectFromRay) {
 
 }
 
-function verLine(x, drawStart, drawEnd, color) {
+function verLine(ctx, height, x, drawStart, drawEnd, color) {
     ctx.beginPath();
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
@@ -122,7 +119,7 @@ function verLine(x, drawStart, drawEnd, color) {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.moveTo(x, drawEnd);
-    ctx.lineTo(x, canvas.height - 1);
+    ctx.lineTo(x, height - 1);
     ctx.stroke();
 }
 
@@ -168,8 +165,8 @@ function eventToIndex(e) {
 }
 
 function main() {
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
     document.body.addEventListener("keydown", onKeyDown, true);
     document.body.addEventListener("keyup", onKeyUp, true);
 
@@ -180,189 +177,193 @@ function main() {
     var dirX = -1.0, dirY = 0.0; //initial direction vector
     var planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
 
-    var oldTime = 0;
-    var time = Date.now();
+    var draw = function () {
+        var oldTime = 0;
+        var time = Date.now();
 
-    // TODO increment by more than one (setting line width appropriately) for more blocky
-    for(var x = 0; x < width; ++x)
-    {
-        // calculate ray position and direction
-        // x-coordinate in camera space
-        var cameraX = 2 * x / width - 1;
-        var rayPosX = posX;
-        var rayPosY = posY;
-        var rayDirX = dirX + planeX * cameraX;
-        var rayDirY = dirY + planeY * cameraX;
-
-        //which box of the map we're in
-        var mapX = Math.round(rayPosX);
-        var mapY = Math.round(rayPosY);
-
-        //length of ray from current position to next x or y-side
-        var sideDistX;
-        var sideDistY;
-
-        //length of ray from one x or y-side to next x or y-side
-        var deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
-        var deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
-        var perpWallDist;
-
-        //what direction to step in x or y-direction (either +1 or -1)
-        var stepX;
-        var stepY;
-
-        var hit = 0; //was there a wall hit?
-        var side; //was a NS or a EW wall hit?
-
-
-        //calculate step and initial sideDist
-        if (rayDirX < 0)
+        // TODO increment by more than one (setting line width appropriately) for more blocky
+        for(var x = 0; x < width; ++x)
         {
-            stepX = -1;
-            sideDistX = (rayPosX - mapX) * deltaDistX;
-        }
-        else
-        {
-            stepX = 1;
-            sideDistX = (mapX + 1.0 - rayPosX) * deltaDistX;
-        }
-        if (rayDirY < 0)
-        {
-            stepY = -1;
-            sideDistY = (rayPosY - mapY) * deltaDistY;
-        }
-        else
-        {
-            stepY = 1;
-            sideDistY = (mapY + 1.0 - rayPosY) * deltaDistY;
-        }
+            // calculate ray position and direction
+            // x-coordinate in camera space
+            var cameraX = 2 * x / width - 1;
+            var rayPosX = posX;
+            var rayPosY = posY;
+            var rayDirX = dirX + planeX * cameraX;
+            var rayDirY = dirY + planeY * cameraX;
+
+            //which box of the map we're in
+            var mapX = Math.round(rayPosX);
+            var mapY = Math.round(rayPosY);
+
+            //length of ray from current position to next x or y-side
+            var sideDistX;
+            var sideDistY;
+
+            //length of ray from one x or y-side to next x or y-side
+            var deltaDistX = Math.sqrt(1 + (rayDirY * rayDirY) / (rayDirX * rayDirX));
+            var deltaDistY = Math.sqrt(1 + (rayDirX * rayDirX) / (rayDirY * rayDirY));
+            var perpWallDist;
+
+            //what direction to step in x or y-direction (either +1 or -1)
+            var stepX;
+            var stepY;
+
+            var hit = 0; //was there a wall hit?
+            var side; //was a NS or a EW wall hit?
 
 
-        //perform DDA
-        while (hit === 0)
-        {
-            //jump to next map square, OR in x-direction, OR in y-direction
-            if (sideDistX < sideDistY)
+            //calculate step and initial sideDist
+            if (rayDirX < 0)
             {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-                side = 0;
+                stepX = -1;
+                sideDistX = (rayPosX - mapX) * deltaDistX;
             }
             else
             {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-                side = 1;
+                stepX = 1;
+                sideDistX = (mapX + 1.0 - rayPosX) * deltaDistX;
             }
-            //Check if ray has hit a wall
-            if (worldMap[mapX][mapY] > 0)
+            if (rayDirY < 0)
             {
-                hit = 1;
+                stepY = -1;
+                sideDistY = (rayPosY - mapY) * deltaDistY;
+            }
+            else
+            {
+                stepY = 1;
+                sideDistY = (mapY + 1.0 - rayPosY) * deltaDistY;
+            }
+
+
+            //perform DDA
+            while (hit === 0)
+            {
+                //jump to next map square, OR in x-direction, OR in y-direction
+                if (sideDistX < sideDistY)
+                {
+                    sideDistX += deltaDistX;
+                    mapX += stepX;
+                    side = 0;
+                }
+                else
+                {
+                    sideDistY += deltaDistY;
+                    mapY += stepY;
+                    side = 1;
+                }
+                //Check if ray has hit a wall
+                if (worldMap[mapX][mapY] > 0)
+                {
+                    hit = 1;
+                }
+            }
+
+
+            //Calculate distance projected on camera direction (oblique distance will give fisheye effect!)
+            if (side === 0)
+            {
+                perpWallDist = Math.abs((mapX - rayPosX + (1 - stepX) / 2) / rayDirX);
+            }
+            else
+            {
+                perpWallDist = Math.abs((mapY - rayPosY + (1 - stepY) / 2) / rayDirY);
+            }
+
+
+            //Calculate height of line to draw on screen
+            var lineHeight = Math.abs(Math.round(height / perpWallDist));
+
+            //calculate lowest and highest pixel to fill in current stripe
+            var drawStart = -lineHeight / 2 + height / 2;
+            if (drawStart < 0)
+            {
+                drawStart = 0;
+            }
+            var drawEnd = lineHeight / 2 + height / 2;
+            if (drawEnd >= height)
+            {
+                drawEnd = height - 1;
+            }
+
+
+
+            //choose wall color
+            var color;
+            switch(worldMap[mapX][mapY])
+            {
+                case 1:  color = 'red';  break; //red
+                case 2:  color = 'green';  break; //green
+                case 3:  color = 'blue';   break; //blue
+                case 4:  color = 'pink';  break; //white
+                default: color = 'yellow'; break; //yellow
+            }
+
+            //give x and y sides different brightness
+            if (side == 1)
+            {
+                    //color = color / 2;
+            }
+
+            //draw the pixels of the stripe as a vertical line
+            verLine(ctx, height, x, drawStart, drawEnd, color);
+        }
+
+        oldTime = time;
+        time = Date.now();
+        var frameTime = (time - oldTime) / 1000.0; //frameTime is the time this frame has taken, in seconds
+        updateFrameRate(1.0 / frameTime); //FPS counter
+        // draw here somewhere
+
+        //speed modifiers
+        var moveSpeed = frameTime * 5.0; //the constant value is in squares/second
+        var rotSpeed = frameTime * 3.0; //the constant value is in radians/second
+
+
+        // no need to read any keys first, the event handlers take care of that
+
+        if (isKeyDown(SDLK_UP)) {
+            //move forward if no wall in front of you
+            if(worldMap[Math.round(posX + dirX * moveSpeed)][Math.round(posY)] === 0) {
+                posX += dirX * moveSpeed;
+            }
+            if(worldMap[Math.round(posX)][Math.round(posY + dirY * moveSpeed)] === 0) {
+                posY += dirY * moveSpeed;
+            }
+        } else if (isKeyDown(SDLK_DOWN)) {
+            //move backwards if no wall behind you
+            if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] === 0) {
+                posX -= dirX * moveSpeed;
+            }
+            if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] === 0) {
+                posY -= dirY * moveSpeed;
             }
         }
 
-
-        //Calculate distance projected on camera direction (oblique distance will give fisheye effect!)
-        if (side === 0)
-        {
-            perpWallDist = Math.abs((mapX - rayPosX + (1 - stepX) / 2) / rayDirX);
-        }
-        else
-        {
-            perpWallDist = Math.abs((mapY - rayPosY + (1 - stepY) / 2) / rayDirY);
-        }
-
-
-        //Calculate height of line to draw on screen
-        var lineHeight = Math.abs(Math.round(height / perpWallDist));
-
-        //calculate lowest and highest pixel to fill in current stripe
-        var drawStart = -lineHeight / 2 + height / 2;
-        if (drawStart < 0)
-        {
-            drawStart = 0;
-        }
-        var drawEnd = lineHeight / 2 + height / 2;
-        if (drawEnd >= height)
-        {
-            drawEnd = height - 1;
+        if (isKeyDown(SDLK_RIGHT)) {
+            //rotate to the right
+            //both camera direction and camera plane must be rotated
+            var oldDirX = dirX;
+            dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
+            dirY = oldDirX * sin(-rotSpeed) + dirY * cos(-rotSpeed);
+            var oldPlaneX = planeX;
+            planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
+            planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
+        } else if (isKeyDown(SDLK_LEFT)) {
+            //rotate to the left
+            //both camera direction and camera plane must be rotated
+            var oldDirX = dirX;
+            dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
+            dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
+            var oldPlaneX = planeX;
+            planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
+            planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
         }
 
+        window.requestAnimationFrame(draw);
+    };
 
-
-        //choose wall color
-        var color;
-        switch(worldMap[mapX][mapY])
-        {
-            case 1:  color = 'red';  break; //red
-            case 2:  color = 'green';  break; //green
-            case 3:  color = 'blue';   break; //blue
-            case 4:  color = 'pink';  break; //white
-            default: color = 'yellow'; break; //yellow
-        }
-
-        //give x and y sides different brightness
-        if (side == 1)
-        {
-                //color = color / 2;
-        }
-
-        //draw the pixels of the stripe as a vertical line
-        verLine(x, drawStart, drawEnd, color);
-    }
-
-    oldTime = time;
-    time = Date.now();
-    var frameTime = (time - oldTime) / 1000.0; //frameTime is the time this frame has taken, in seconds
-    updateFrameRate(1.0 / frameTime); //FPS counter
-    // draw here somewhere
-
-    //speed modifiers
-    var moveSpeed = frameTime * 5.0; //the constant value is in squares/second
-    var rotSpeed = frameTime * 3.0; //the constant value is in radians/second
-
-
-    // no need to read any keys first, the event handlers take care of that
-
-    if (isKeyDown(SDLK_UP)) {
-        //move forward if no wall in front of you
-        if(worldMap[Math.round(posX + dirX * moveSpeed)][Math.round(posY)] === false) {
-            posX += dirX * moveSpeed;
-        }
-        if(worldMap[Math.round(posX)][Math.round(posY + dirY * moveSpeed)] === false) {
-            posY += dirY * moveSpeed;
-        }
-    } else if (isKeyDown(SDLK_DOWN)) {
-        //move backwards if no wall behind you
-        if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] === false) {
-            posX -= dirX * moveSpeed;
-        }
-        if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] === false) {
-            posY -= dirY * moveSpeed;
-        }
-    }
-
-    if (isKeyDown(SDLK_RIGHT)) {
-        //rotate to the right
-        //both camera direction and camera plane must be rotated
-        var oldDirX = dirX;
-        dirX = dirX * cos(-rotSpeed) - dirY * sin(-rotSpeed);
-        dirY = oldDirX * sin(-rotSpeed) + dirY * cos(-rotSpeed);
-        var oldPlaneX = planeX;
-        planeX = planeX * cos(-rotSpeed) - planeY * sin(-rotSpeed);
-        planeY = oldPlaneX * sin(-rotSpeed) + planeY * cos(-rotSpeed);
-    } else if (isKeyDown(SDLK_LEFT)) {
-        //rotate to the left
-        //both camera direction and camera plane must be rotated
-        var oldDirX = dirX;
-        dirX = dirX * cos(rotSpeed) - dirY * sin(rotSpeed);
-        dirY = oldDirX * sin(rotSpeed) + dirY * cos(rotSpeed);
-        var oldPlaneX = planeX;
-        planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
-        planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
-    }
-
-
+    window.requestAnimationFrame(draw);
 
     // for (var x = 0; x < canvas.width; ++x) {
     //     drawLine(x, canvas.height);
