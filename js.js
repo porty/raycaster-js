@@ -138,7 +138,7 @@ function isKeyDown(key) {
 }
 
 function onKeyDown(e) {
-    var index = keyToIndex(e.key);
+    var index = eventToIndex(e);
     if (index !== null) {
         keys[index] = false;
         e.preventDefault();
@@ -146,22 +146,22 @@ function onKeyDown(e) {
 }
 
 function onKeyUp(e) {
-    var index = keyToIndex(e.key);
+    var index = eventToIndex(e);
     if (index !== null) {
         keys[index] = true;
         e.preventDefault();
     }
 }
 
-function keyToIndex(key) {
-    switch(key) {
-        case VK_UP:
+function eventToIndex(e) {
+    switch(e.keyCode) {
+        case 38:
             return SDLK_UP;
-        case VK_DOWN:
+        case 40:
             return SDLK_DOWN;
-        case VK_LEFT:
+        case 37:
             return SDLK_LEFT;
-        case VK_RIGHT:
+        case 39:
             return SDLK_RIGHT;
     }
     return null;
@@ -170,8 +170,8 @@ function keyToIndex(key) {
 function main() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    canvas.addEventListener("keydown", onKeyDown);
-    canvas.addEventListener("keyup", onKeyUp);
+    document.body.addEventListener("keydown", onKeyDown, true);
+    document.body.addEventListener("keyup", onKeyUp, true);
 
     var width = canvas.width;
     var height = canvas.height;
