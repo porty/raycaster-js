@@ -25,9 +25,6 @@ var worldMap = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
-var canvas = null;
-var ctx = null;
-
 function Point(x, y) {
     this.x = x;
     this.y = y;
@@ -87,7 +84,7 @@ function findObjectFromRay(origin, angle, returnObjectFromRay) {
 
 }
 
-function verLine(x, drawStart, drawEnd, color) {
+function verLine(ctx, height, x, drawStart, drawEnd, color) {
     ctx.beginPath();
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
@@ -106,13 +103,13 @@ function verLine(x, drawStart, drawEnd, color) {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.moveTo(x, drawEnd);
-    ctx.lineTo(x, canvas.height - 1);
+    ctx.lineTo(x, height - 1);
     ctx.stroke();
 }
 
 function main() {
-    canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
 
     var width = canvas.width;
     var height = canvas.height;
@@ -120,6 +117,26 @@ function main() {
     var posX = 22.0, posY = 11.5;  //x and y start position
     var dirX = -1.0, dirY = 0.0; //initial direction vector
     var planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
+
+    var rotation = 0;
+
+    var lol = function() {
+        // rotation += 0.01;
+        // planeX = Math.sin(rotation);
+        // dirX = Math.cos(rotation);
+        posY += 0.01;
+
+        draw(width, height, ctx, posX, posY, dirX, dirY, planeX, planeY);
+
+
+        window.requestAnimationFrame(lol);
+    };
+
+    window.requestAnimationFrame(lol);
+}
+
+function draw(width, height, ctx, posX, posY, dirX, dirY, planeX, planeY) {
+
 
 
     // TODO increment by more than one (setting line width appropriately) for more blocky
@@ -247,7 +264,7 @@ function main() {
         }
 
         //draw the pixels of the stripe as a vertical line
-        verLine(x, drawStart, drawEnd, color);
+        verLine(ctx, height, x, drawStart, drawEnd, color);
     }
 
 
