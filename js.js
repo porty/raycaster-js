@@ -140,7 +140,7 @@ function isKeyDown(key) {
 function onKeyDown(e) {
     var index = eventToIndex(e);
     if (index !== null) {
-        keys[index] = false;
+        keys[index] = true;
         e.preventDefault();
     }
 }
@@ -148,7 +148,7 @@ function onKeyDown(e) {
 function onKeyUp(e) {
     var index = eventToIndex(e);
     if (index !== null) {
-        keys[index] = true;
+        keys[index] = false;
         e.preventDefault();
     }
 }
